@@ -1,4 +1,4 @@
-source_account,target_account,notes
+sap_gl_acct,oracle_acct,mapping_notes
 100000,01-1000-000,Cash
 110000,01-1100-000,AR
 110010,01-1101-000,Allowance

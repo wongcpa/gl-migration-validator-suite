@@ -1,4 +1,4 @@
-source_account,target_account,notes
+workday_worktag_id,netsuite_acct_num,mapping_notes
 WD-1000,1000,Cash
 WD-1100,1100,AR
 WD-1200,1110,Prepaid

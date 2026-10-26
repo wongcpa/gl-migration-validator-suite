@@ -1,4 +1,4 @@
-source_account,target_account,notes
+netsuite_acct_num,sap_gl_acct,mapping_notes
 1000,100000,Operating bank accounts aligned
 1001,100010,Payroll bank accounts aligned
 1010,110000,Trade receivables

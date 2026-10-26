@@ -1,4 +1,4 @@
-source_account,target_account,notes
+xero_code,netsuite_acct_num,mapping_notes
 090,1000,Checking accounts
 091,1001,Savings accounts
 200,1100,AR

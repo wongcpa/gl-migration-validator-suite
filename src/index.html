@@ -4,24 +4,26 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ERP GL Mapping Validator</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Crect width='200' height='200' rx='18' fill='%230F2A3D'/%3E%3Cpolyline points='44,100 74,146 112,60' fill='none' stroke='%23fff' stroke-width='18' stroke-linecap='square'/%3E%3Cpolyline points='90,100 120,146 158,60' fill='none' stroke='%23C9A45C' stroke-width='18' stroke-linecap='square'/%3E%3C/svg%3E">
 <style>
   :root {
-    --bg:       #09090d;
-    --surface:  #0f1017;
-    --surface2: #161820;
-    --border:   #1c1e2a;
-    --border2:  #252838;
-    --teal:     #7c6af7;
-    --teal-dim: #5548c8;
-    --amber:    #f5a623;
-    --red:      #e05555;
-    --green:    #3dd68c;
-    --blue:     #60a5fa;
-    --text:     #e2e4f0;
-    --muted:    #555870;
-    --mono:     'JetBrains Mono', monospace;
-    --display:  'Syne', sans-serif;
+    --bg:       #F6F6F4;
+    --surface:  #ffffff;
+    --surface2: #f5f0e8;
+    --border:   #d1cdc4;
+    --border2:  #bfb9ad;
+    --teal:     #7A5F2C;
+    --teal-dim: #9A7A3E;
+    --amber:    #b45309;
+    --red:      #b91c1c;
+    --green:    #15803d;
+    --blue:     #0F2A3D;
+    --text:     #0d0d0d;
+    --muted:    #6b7280;
+    --mono:     'IBM Plex Mono',ui-monospace,monospace;
+    --display:  'Sora',system-ui,sans-serif;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { background: var(--bg); color: var(--text); font-family: var(--mono); font-size: 13px; min-height: 100vh; line-height: 1.6; }
@@ -61,7 +63,7 @@
     text-align: center;
   }
   .path-card:hover { border-color: var(--teal); }
-  .path-card.selected { border-color: var(--teal); background: rgba(124,106,247,0.08); }
+  .path-card.selected { border-color: var(--teal); background: rgba(122,95,44,0.08); }
   .path-erps {
     font-family: var(--display);
     font-size: 11px;
@@ -87,7 +89,7 @@
     transition: all 0.2s; background: var(--surface);
     margin-bottom: 1.5rem;
   }
-  .drop-area:hover, .drop-area.dragover { border-color: var(--teal); background: rgba(124,106,247,0.04); }
+  .drop-area:hover, .drop-area.dragover { border-color: var(--teal); background: rgba(122,95,44,0.04); }
   .drop-title { font-family: var(--display); font-size: 15px; font-weight: 700; margin-bottom: 6px; }
   .drop-sub { color: var(--muted); font-size: 11px; letter-spacing: 0.05em; }
   .drop-sub span { color: var(--teal); }
@@ -136,18 +138,18 @@
 
   /* ── TABLES ── */
   .table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; overflow: hidden; margin-bottom: 2rem; }
-  .table-wrap.errors { border-color: rgba(224,85,85,0.35); }
-  .table-wrap.warnings { border-color: rgba(245,166,35,0.3); }
-  .table-wrap.clean   { border-color: rgba(61,214,140,0.25); }
+  .table-wrap.errors { border-color: rgba(185,28,28,0.35); }
+  .table-wrap.warnings { border-color: rgba(180,83,9,0.3); }
+  .table-wrap.clean   { border-color: rgba(21,128,61,0.25); }
   table { width: 100%; border-collapse: collapse; }
   th { background: var(--surface2); padding: 9px 14px; text-align: left; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--border); font-weight: 400; }
   td { padding: 9px 14px; border-bottom: 1px solid var(--border); font-size: 12px; color: var(--text); vertical-align: middle; }
   tr:last-child td { border-bottom: none; }
-  tr:hover td { background: rgba(255,255,255,0.012); }
+  tr:hover td { background: rgba(15,42,61,0.03); }
 
-  .badge-error   { color: var(--red);   font-size: 10px; padding: 2px 7px; border-radius: 2px; background: rgba(224,85,85,0.12);   border: 1px solid rgba(224,85,85,0.3);   white-space: nowrap; }
-  .badge-warning { color: var(--amber); font-size: 10px; padding: 2px 7px; border-radius: 2px; background: rgba(245,166,35,0.12); border: 1px solid rgba(245,166,35,0.3); white-space: nowrap; }
-  .badge-clean   { color: var(--green); font-size: 10px; padding: 2px 7px; border-radius: 2px; background: rgba(61,214,140,0.10);  border: 1px solid rgba(61,214,140,0.25); white-space: nowrap; }
+  .badge-error   { color: var(--red);   font-size: 10px; padding: 2px 7px; border-radius: 2px; background: rgba(185,28,28,0.12);   border: 1px solid rgba(185,28,28,0.3);   white-space: nowrap; }
+  .badge-warning { color: var(--amber); font-size: 10px; padding: 2px 7px; border-radius: 2px; background: rgba(180,83,9,0.12); border: 1px solid rgba(180,83,9,0.3); white-space: nowrap; }
+  .badge-clean   { color: var(--green); font-size: 10px; padding: 2px 7px; border-radius: 2px; background: rgba(21,128,61,0.10);  border: 1px solid rgba(21,128,61,0.25); white-space: nowrap; }
 
   .acct-code { font-size: 11px; color: var(--teal); font-weight: 500; }
   .acct-name { font-size: 12px; }
@@ -157,7 +159,7 @@
   /* ── FILTER ── */
   .filter-bar { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; align-items: center; }
   .filter-btn { font-family: var(--mono); font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; padding: 5px 12px; border-radius: 2px; cursor: pointer; border: 1px solid var(--border2); background: transparent; color: var(--muted); transition: all 0.12s; }
-  .filter-btn:hover, .filter-btn.active { border-color: var(--teal); color: var(--teal); background: rgba(124,106,247,0.07); }
+  .filter-btn:hover, .filter-btn.active { border-color: var(--teal); color: var(--teal); background: rgba(122,95,44,0.07); }
   .search-input { font-family: var(--mono); font-size: 11px; background: var(--surface); border: 1px solid var(--border2); color: var(--text); padding: 5px 12px; border-radius: 2px; outline: none; margin-left: auto; width: 200px; transition: border-color 0.15s; }
   .search-input:focus { border-color: var(--teal); }
   .search-input::placeholder { color: var(--muted); }
@@ -170,9 +172,38 @@
 
   @media (max-width: 1100px) { .path-grid { grid-template-columns: repeat(3, 1fr); } }
   @media (max-width: 800px)  { .path-grid { grid-template-columns: 1fr 1fr; } .stats-row { grid-template-columns: 1fr 1fr; } main { padding: 1rem; } }
+
+/* ── WONG.CPA BRAND LAYER ── */
+body{font-family:'IBM Plex Sans',system-ui,sans-serif}
+.wb-bar{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:0.7rem 2.5rem;background:#0F2A3D}
+.wb-brand{display:inline-flex;align-items:center;gap:0.6rem;font-family:'Sora',system-ui,sans-serif;font-weight:600;font-size:0.95rem;color:#fff;text-decoration:none;letter-spacing:-0.01em}
+.wb-brand svg{border-radius:4px;flex:none}
+.wb-back{font-family:'IBM Plex Mono',monospace;font-size:0.72rem;letter-spacing:0.06em;text-transform:uppercase;color:#C9A45C;text-decoration:none;transition:color 0.15s}
+.wb-back:hover{color:#fff}
+header{background:#ffffff !important;border-bottom:1px solid #d1cdc4 !important}
+.logo-text{font-family:'Sora',system-ui,sans-serif !important;color:#0F2A3D !important;font-style:normal !important;font-weight:700 !important;letter-spacing:-0.01em}
+.logo em{color:#7A5F2C}
+.logo-sub{color:#7A5F2C !important;font-family:'IBM Plex Mono',monospace}
+.logo-icon{border-color:#0F2A3D !important;color:#0F2A3D !important;background:#f5f0e8}
+.header-badge,.fx-badge,.std-badge,header .tag{border-color:#9A7A3E !important;color:#7A5F2C !important;opacity:1 !important}
+.wb-samples{display:flex;flex-wrap:wrap;align-items:baseline;gap:0.35rem 1rem;padding:0.65rem 2.5rem;background:#f5f0e8;border-bottom:1px solid #d1cdc4;font-family:'IBM Plex Mono',monospace;font-size:11px}
+.wb-samples-label{letter-spacing:0.08em;text-transform:uppercase;color:#6b7280}
+.wb-samples a{color:#7A5F2C;text-decoration:none;border-bottom:1px dotted #9A7A3E}
+.wb-samples a:hover{border-bottom-style:solid}
+.wb-samples a.wb-gh{color:#6b7280;border-bottom-color:#d1cdc4}
+.btn-primary,.toggle-btn.active{background:#0F2A3D;border-color:#0F2A3D;color:#fff}
+.btn-primary:hover{background:#1B3D55;border-color:#1B3D55;color:#fff}
+.btn-primary:disabled{background:#d1cdc4;border-color:#d1cdc4;color:#6b7280}
+.results-title,.section-head h2,.empty-big,.rb-title,.pdf-icon,.dc-title{font-style:normal !important}
+.acct-code,.stmt-code,.code-cell,.fr-amt,.stmt-amount,.amount-col,.mc-l,.stat-label,.metric-label,th{font-family:'IBM Plex Mono',monospace}
+@media(max-width:900px){.wb-bar,.wb-samples{padding-left:1rem;padding-right:1rem}}
 </style>
 </head>
 <body>
+<div class="wb-bar">
+  <a class="wb-brand" href="https://www.wong.cpa/"><svg viewBox="0 0 200 200" width="26" height="26" aria-hidden="true"><rect width="200" height="200" rx="14" fill="#0F2A3D"/><polyline points="45,96 75,140 111,60" fill="none" stroke="#fff" stroke-width="12" stroke-linecap="square"/><polyline points="89,96 119,140 155,60" fill="none" stroke="#C9A45C" stroke-width="12" stroke-linecap="square"/></svg><span>Jimmy Wong, CPA</span></a>
+  <a class="wb-back" href="https://www.wong.cpa/#projects">← All tools</a>
+</div>
 
 <header>
   <div class="logo">
@@ -184,6 +215,15 @@
   </div>
   <div class="header-badge">100% Local · No Upload</div>
 </header>
+<div class="wb-samples">
+  <span class="wb-samples-label">Sample data ↓</span>
+  <a href="../tests/fixtures/mapping_netsuite_to_sap.csv" download>mapping_netsuite_to_sap.csv</a>
+  <a href="../tests/fixtures/mapping_xero_to_netsuite.csv" download>mapping_xero_to_netsuite.csv</a>
+  <a href="../tests/fixtures/mapping_sap_to_oracle.csv" download>mapping_sap_to_oracle.csv</a>
+  <a href="../tests/fixtures/mapping_workday_to_netsuite.csv" download>mapping_workday_to_netsuite.csv</a>
+  <a href="../tests/fixtures/mapping_qbo_to_netsuite.csv" download>mapping_qbo_to_netsuite.csv</a>
+  <a class="wb-gh" href="https://github.com/wongcpa/gl-migration-validator-suite/tree/main/tests/fixtures" target="_blank" rel="noopener">View on GitHub ↗</a>
+</div>
 
 <main>
 
