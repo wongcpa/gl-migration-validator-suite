@@ -585,6 +585,17 @@ Object.keys(PATHS).forEach(name => {
   pathGrid.appendChild(card);
 });
 
+// ── DEEP LINK: ?path=ns-sap preselects a migration path ─────────────────────
+const PATH_SLUGS = {
+  "ns-sap": "NetSuite → SAP", "xero-ns": "Xero → NetSuite", "sap-oracle": "SAP → Oracle",
+  "wd-ns": "Workday → NetSuite", "qbo-ns": "QBO → NetSuite",
+};
+const linkedPath = PATH_SLUGS[new URLSearchParams(location.search).get("path")];
+if (linkedPath) {
+  const idx = Object.keys(PATHS).indexOf(linkedPath);
+  window.addEventListener("DOMContentLoaded", () => selectPath(linkedPath, pathGrid.children[idx]));
+}
+
 function selectPath(name, card) {
   selectedPath = name;
   document.querySelectorAll(".path-card").forEach(c => c.classList.remove("selected"));
