@@ -396,23 +396,24 @@ function buildNS() {
     "1210":{"name":"Accumulated Depreciation","type":"Fixed Asset","active":true},
     "1300":{"name":"Intercompany Receivable","type":"Other Current Asset","active":true},
     "1400":{"name":"Content Assets","type":"Other Asset","active":true},
+    "1410":{"name":"Accum Amort - Content","type":"Other Asset","active":true},
     "2000":{"name":"Accounts Payable","type":"Accounts Payable","active":true},
     "2010":{"name":"Accrued Liabilities","type":"Other Current Liability","active":true},
     "2020":{"name":"Deferred Revenue","type":"Other Current Liability","active":true},
     "2030":{"name":"Intercompany Payable","type":"Other Current Liability","active":true},
     "2100":{"name":"Long-Term Debt","type":"Long Term Liability","active":true},
     "2110":{"name":"Credit Card Liability","type":"Other Current Liability","active":true},
-    "2200":{"name":"Deferred Revenue","type":"Other Current Liability","active":true},
     "3000":{"name":"Common Stock","type":"Equity","active":true},
     "3100":{"name":"Retained Earnings","type":"Equity","active":true},
     "3200":{"name":"APIC","type":"Equity","active":true},
-    "4000":{"name":"Revenue","type":"Income","active":true},
+    "4000":{"name":"Content Licensing Revenue","type":"Income","active":true},
     "4010":{"name":"Streaming Revenue","type":"Income","active":true},
     "4020":{"name":"Advertising Revenue","type":"Income","active":true},
     "4030":{"name":"Intercompany Revenue","type":"Income","active":true},
     "4100":{"name":"Revenue Deductions","type":"Income","active":true},
-    "5000":{"name":"Cost of Goods Sold","type":"Cost of Goods Sold","active":true},
+    "5000":{"name":"Content Amortization","type":"Cost of Goods Sold","active":true},
     "5010":{"name":"Royalty Expense","type":"Cost of Goods Sold","active":true},
+    "5020":{"name":"Distribution Costs","type":"Cost of Goods Sold","active":true},
     "5100":{"name":"Materials","type":"Cost of Goods Sold","active":true},
     "6000":{"name":"Salaries & Wages","type":"Expense","active":true},
     "6010":{"name":"Benefits","type":"Expense","active":true},
@@ -420,7 +421,7 @@ function buildNS() {
     "6030":{"name":"Software & IT","type":"Expense","active":true},
     "6040":{"name":"Marketing","type":"Expense","active":true},
     "6050":{"name":"Depreciation Expense","type":"Expense","active":true},
-    "6100":{"name":"Rent","type":"Expense","active":true},
+    "6100":{"name":"Occupancy","type":"Expense","active":true},
     "6200":{"name":"IT and Technology","type":"Expense","active":true},
     "6300":{"name":"Professional Services","type":"Expense","active":true},
     "6400":{"name":"Depreciation","type":"Expense","active":true},
@@ -428,55 +429,55 @@ function buildNS() {
     "7100":{"name":"Other Income","type":"Other Income","active":true},
     "8000":{"name":"Interest Expense","type":"Other Expense","active":true},
     "8100":{"name":"Other Expenses","type":"Other Expense","active":true},
+    "9999":{"name":"Suspense - Legacy","type":"Other Current Asset","active":false},
   };
 }
 
 function buildSAP() {
-  const BS = "X", PL = "P";
   return {
-    "100000":{"name":"Bank Operating","type":BS,"active":true},
-    "100010":{"name":"Bank Payroll","type":BS,"active":true},
-    "110000":{"name":"Trade Receivables","type":BS,"active":true},
-    "110010":{"name":"Allowance - Bad Debt","type":BS,"active":true},
-    "110020":{"name":"Unbilled Receivables","type":BS,"active":true},
-    "120000":{"name":"Prepaid Expenses","type":BS,"active":true},
-    "130000":{"name":"Inventory","type":BS,"active":true},
-    "131000":{"name":"Intercompany Receivables","type":BS,"active":true},
-    "150000":{"name":"Plant and Equipment","type":BS,"active":true},
-    "151000":{"name":"Accumulated Depreciation","type":BS,"active":true},
-    "160000":{"name":"Intangible Assets","type":BS,"active":true},
-    "161000":{"name":"Accumulated Amortization","type":BS,"active":true},
-    "170000":{"name":"Other Long-Term Assets","type":BS,"active":true},
-    "200000":{"name":"Trade Payables","type":BS,"active":true},
-    "210000":{"name":"Accrued Liabilities","type":BS,"active":true},
-    "220000":{"name":"Deferred Revenue","type":BS,"active":true},
-    "221000":{"name":"Intercompany Payables","type":BS,"active":true},
-    "230000":{"name":"Tax Payables","type":BS,"active":true},
-    "250000":{"name":"Long-Term Borrowings","type":BS,"active":true},
-    "300000":{"name":"Share Capital","type":BS,"active":true},
-    "310000":{"name":"Retained Earnings","type":BS,"active":true},
-    "320000":{"name":"APIC","type":BS,"active":true},
-    "400000":{"name":"Content Licensing Revenue","type":PL,"active":true},
-    "400100":{"name":"Streaming Revenue","type":PL,"active":true},
-    "400200":{"name":"Advertising Revenue","type":PL,"active":true},
-    "400300":{"name":"Intercompany Revenue","type":PL,"active":true},
-    "400900":{"name":"Revenue Deductions","type":PL,"active":true},
-    "500000":{"name":"Content Amortization","type":PL,"active":true},
-    "500100":{"name":"Royalties","type":PL,"active":true},
-    "500200":{"name":"Distribution","type":PL,"active":true},
-    "600000":{"name":"Personnel Costs","type":PL,"active":true},
-    "600100":{"name":"Employee Benefits","type":PL,"active":true},
-    "600200":{"name":"Rent and Occupancy","type":PL,"active":true},
-    "600300":{"name":"IT and Software","type":PL,"active":true},
-    "600400":{"name":"Marketing","type":PL,"active":true},
-    "600500":{"name":"Travel and Entertainment","type":PL,"active":true},
-    "600600":{"name":"Depreciation","type":PL,"active":true},
-    "600700":{"name":"Professional Services","type":PL,"active":true},
-    "600800":{"name":"Insurance","type":PL,"active":true},
-    "700000":{"name":"Interest Income","type":PL,"active":true},
-    "700100":{"name":"FX Gains","type":PL,"active":true},
-    "800000":{"name":"Interest Expense","type":PL,"active":true},
-    "800100":{"name":"FX Losses","type":PL,"active":true},
+    "100000":{"name":"Bank Operating","type":"X","active":true},
+    "100010":{"name":"Bank Payroll","type":"X","active":true},
+    "110000":{"name":"Trade Receivables","type":"X","active":true},
+    "110010":{"name":"Allowance - Bad Debt","type":"X","active":true},
+    "110020":{"name":"Unbilled Receivables","type":"X","active":true},
+    "120000":{"name":"Prepaid Expenses","type":"X","active":true},
+    "130000":{"name":"Inventory","type":"X","active":true},
+    "131000":{"name":"Intercompany Receivables","type":"X","active":true},
+    "150000":{"name":"Plant and Equipment","type":"X","active":true},
+    "151000":{"name":"Accumulated Depreciation","type":"X","active":true},
+    "160000":{"name":"Intangible Assets - Content","type":"X","active":true},
+    "161000":{"name":"Accumulated Amortization","type":"X","active":true},
+    "170000":{"name":"Other Long-Term Assets","type":"X","active":true},
+    "200000":{"name":"Trade Payables","type":"X","active":true},
+    "210000":{"name":"Accrued Liabilities","type":"X","active":true},
+    "220000":{"name":"Deferred Revenue","type":"X","active":true},
+    "221000":{"name":"Intercompany Payables","type":"X","active":true},
+    "230000":{"name":"Tax Payables","type":"X","active":true},
+    "250000":{"name":"Long-Term Borrowings","type":"X","active":true},
+    "300000":{"name":"Share Capital","type":"X","active":true},
+    "310000":{"name":"Retained Earnings","type":"X","active":true},
+    "320000":{"name":"APIC","type":"X","active":true},
+    "400000":{"name":"Content Licensing Revenue","type":"P","active":true},
+    "400100":{"name":"Streaming Revenue","type":"P","active":true},
+    "400200":{"name":"Advertising Revenue","type":"P","active":true},
+    "400300":{"name":"Intercompany Revenue","type":"P","active":true},
+    "400900":{"name":"Revenue Deductions","type":"P","active":true},
+    "500000":{"name":"Content Amortization","type":"P","active":true},
+    "500100":{"name":"Royalties","type":"P","active":true},
+    "500200":{"name":"Distribution","type":"P","active":true},
+    "600000":{"name":"Personnel Costs","type":"P","active":true},
+    "600100":{"name":"Employee Benefits","type":"P","active":true},
+    "600200":{"name":"Rent and Occupancy","type":"P","active":true},
+    "600300":{"name":"IT and Software","type":"P","active":true},
+    "600400":{"name":"Marketing","type":"P","active":true},
+    "600500":{"name":"Travel and Entertainment","type":"P","active":true},
+    "600600":{"name":"Depreciation and Amortization","type":"P","active":true},
+    "600700":{"name":"Professional Services","type":"P","active":true},
+    "600800":{"name":"Insurance","type":"P","active":true},
+    "700000":{"name":"Interest Income","type":"P","active":true},
+    "700100":{"name":"FX Gains","type":"P","active":true},
+    "800000":{"name":"Interest Expense","type":"P","active":true},
+    "800100":{"name":"FX Losses","type":"P","active":true},
   };
 }
 
@@ -598,7 +599,7 @@ function NS_SAP_MAP() {
   return {"Bank":"X","Accounts Receivable":"X","Other Current Asset":"X","Fixed Asset":"X","Other Asset":"X","Accounts Payable":"X","Other Current Liability":"X","Long Term Liability":"X","Equity":"X","Income":"P","Cost of Goods Sold":"P","Expense":"P","Other Income":"P","Other Expense":"P"};
 }
 function XERO_NS_MAP() {
-  return {"BANK":"Bank","CURRENT":"Other Current Asset","CURRLIAB":"Other Current Liability","DEPRECIATN":"Fixed Asset","DIRECTCOSTS":"Cost of Goods Sold","EQUITY":"Equity","EXPENSE":"Expense","FIXED":"Fixed Asset","OTHERINCOME":"Other Income","OVERHEADS":"Expense","PREPAYMENT":"Other Current Asset","REVENUE":"Income","SALES":"Income","TERMLIAB":"Long Term Liability"};
+  return {"BANK":"Bank","CURRENT":"Other Current Asset","CURRLIAB":"Other Current Liability","DEPRECIATN":"Fixed Asset","DIRECTCOSTS":"Cost of Goods Sold","EQUITY":"Equity","EXPENSE":"Expense","FIXED":"Fixed Asset","LIABILITY":"Long Term Liability","OTHERINCOME":"Other Income","OVERHEADS":"Expense","PREPAYMENT":"Other Current Asset","REVENUE":"Income","SALES":"Income","TERMLIAB":"Long Term Liability"};
 }
 function SAP_ORACLE_MAP() { return {"X":"Balance Sheet","P":"Income Statement"}; }
 function WD_NS_MAP() { return {"Assets":"Other Current Asset","Liabilities":"Other Current Liability","Equity":"Equity","Revenue":"Income","Expenses":"Expense"}; }
@@ -701,6 +702,10 @@ function parseCSV(text) {
   });
 }
 
+// Contra revenue accounts (deductions from gross) must not land in gross revenue.
+const CONTRA_RE = /deduction|contra|return|rebate|discount|price protection/i;
+const GROSS_RE  = /revenue|sales/i;
+
 // ── VALIDATION ENGINE ─────────────────────────────────────────────────────────
 function runValidation() {
   if (!loadedFile || !selectedPath) return;
@@ -740,8 +745,18 @@ function runValidation() {
       if (!s.active) warnings.push({type:"INACTIVE", src:srcCode, tgt:tgtCode, srcName:s.name, tgtName:t?.name||"", detail:`Source account ${srcCode} (${s.name}) is inactive. Confirm migration intent.`});
 
       const expected = typeMap[s.type];
-      if (expected && t && t.type !== expected) {
+      const mismatch = !!(expected && t && t.type !== expected);
+      if (mismatch) {
         errors.push({type:"TYPE_MISMATCH", src:srcCode, tgt:tgtCode, srcName:s.name, tgtName:t.name, detail:`Type mismatch: source type "${s.type}" expects target type "${expected}" but found "${t.type}".`});
+      }
+
+      const contraToGross = !!(t && CONTRA_RE.test(s.name) && GROSS_RE.test(t.name) && !CONTRA_RE.test(t.name));
+      if (contraToGross) {
+        errors.push({type:"CONTRA_TO_GROSS", src:srcCode, tgt:tgtCode, srcName:s.name, tgtName:t.name, detail:`Contra revenue account mapped to gross revenue account ${tgtCode} (${t.name}). Net revenue would be overstated; map to a contra revenue account.`});
+      }
+
+      if (/opening balance equity/i.test(s.name)) {
+        warnings.push({type:"OBE_RECLASS", src:srcCode, tgt:tgtCode, srcName:s.name, tgtName:t?.name||"", detail:`Opening Balance Equity should be reclassified (usually to Retained Earnings) and cleared at cutover.`});
       }
 
       if (tgtCode) {
@@ -749,7 +764,7 @@ function runValidation() {
         tgtUsage[tgtCode].push(srcCode);
       }
 
-      clean.push({srcCode, srcName:s.name, srcType:s.type, tgtCode, tgtName:t?.name||"", notes});
+      if (!mismatch && !contraToGross) clean.push({srcCode, srcName:s.name, srcType:s.type, tgtCode, tgtName:t?.name||"", notes});
     });
 
     Object.entries(tgtUsage).forEach(([tgt, srcs]) => {
@@ -762,7 +777,7 @@ function runValidation() {
       .filter(([code, a]) => !mappedSrc.has(code) && a.active)
       .map(([code, a]) => ({code, name:a.name, type:a.type}));
 
-    resultData = {errors, warnings, unmapped, clean};
+    resultData = {errors, warnings, unmapped, clean, total: rows.filter(r => r[cfg.src]).length};
     renderResults();
   };
   reader.readAsText(loadedFile);
@@ -770,12 +785,12 @@ function runValidation() {
 
 // ── RENDER RESULTS ────────────────────────────────────────────────────────────
 function renderResults() {
-  const {errors, warnings, unmapped, clean} = resultData;
+  const {errors, warnings, unmapped, clean, total} = resultData;
   document.getElementById("empty-state").style.display = "none";
   document.getElementById("results").style.display = "block";
   document.getElementById("export-btn").style.display = "inline-flex";
 
-  document.getElementById("s-total").textContent    = errors.length + warnings.length + clean.length;
+  document.getElementById("s-total").textContent    = total;
   document.getElementById("s-clean").textContent    = clean.length;
   document.getElementById("s-errors").textContent   = errors.length;
   document.getElementById("s-warnings").textContent = warnings.length;
