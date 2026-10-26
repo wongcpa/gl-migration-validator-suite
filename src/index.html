@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ERP GL Mapping Validator</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:       #09090d;
+    --surface:  #0f1017;
+    --surface2: #161820;
+    --border:   #1c1e2a;
+    --border2:  #252838;
+    --teal:     #7c6af7;
+    --teal-dim: #5548c8;
+    --amber:    #f5a623;
+    --red:      #e05555;
+    --green:    #3dd68c;
+    --blue:     #60a5fa;
+    --text:     #e2e4f0;
+    --muted:    #555870;
+    --mono:     'JetBrains Mono', monospace;
+    --display:  'Syne', sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: var(--mono); font-size: 13px; min-height: 100vh; line-height: 1.6; }
+
+  header {
+    border-bottom: 1px solid var(--border);
+    padding: 1.5rem 2.5rem;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .logo { display: flex; align-items: center; gap: 12px; }
+  .logo-icon {
+    width: 36px; height: 36px;
+    border: 1.5px solid var(--teal); border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--display); font-size: 12px; font-weight: 800; color: var(--teal);
+  }
+  .logo-text { font-family: var(--display); font-size: 17px; font-weight: 700; }
+  .logo-sub  { font-size: 10px; color: var(--muted); letter-spacing: 0.12em; text-transform: uppercase; }
+  .header-badge { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; padding: 4px 10px; border: 1px solid var(--teal-dim); color: var(--teal); border-radius: 2px; }
+
+  main { padding: 2rem 2.5rem; max-width: 1400px; margin: 0 auto; }
+
+  /* ── MIGRATION SELECTOR ── */
+  .path-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+    margin-bottom: 1.5rem;
+  }
+  .path-card {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 6px;
+    padding: 14px 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: center;
+  }
+  .path-card:hover { border-color: var(--teal); }
+  .path-card.selected { border-color: var(--teal); background: rgba(124,106,247,0.08); }
+  .path-erps {
+    font-family: var(--display);
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 6px;
+    line-height: 1.4;
+  }
+  .path-arrow { color: var(--teal); font-size: 16px; margin: 4px 0; }
+  .path-fixture { font-size: 9px; color: var(--muted); letter-spacing: 0.04em; }
+  .path-cols {
+    font-size: 9px;
+    color: var(--muted);
+    margin-top: 6px;
+    letter-spacing: 0.02em;
+    line-height: 1.5;
+  }
+
+  /* ── DROP ZONE ── */
+  .drop-area {
+    border: 1.5px dashed var(--border2); border-radius: 8px;
+    padding: 2.5rem 2rem; text-align: center; cursor: pointer;
+    transition: all 0.2s; background: var(--surface);
+    margin-bottom: 1.5rem;
+  }
+  .drop-area:hover, .drop-area.dragover { border-color: var(--teal); background: rgba(124,106,247,0.04); }
+  .drop-title { font-family: var(--display); font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+  .drop-sub { color: var(--muted); font-size: 11px; letter-spacing: 0.05em; }
+  .drop-sub span { color: var(--teal); }
+  #file-input { display: none; }
+
+  .file-loaded {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 16px; background: var(--surface);
+    border: 1px solid var(--border2); border-radius: 6px; margin-bottom: 1.5rem;
+  }
+  .file-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); flex-shrink: 0; }
+  .file-name { flex: 1; }
+  .file-meta { color: var(--muted); font-size: 11px; }
+  .clear-btn { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 16px; transition: color 0.15s; }
+  .clear-btn:hover { color: var(--red); }
+
+  /* ── CONTROLS ── */
+  .controls { display: flex; gap: 10px; margin-bottom: 2rem; align-items: center; }
+  .btn {
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em;
+    text-transform: uppercase; padding: 9px 20px; border-radius: 3px;
+    cursor: pointer; border: 1px solid var(--border2);
+    background: var(--surface); color: var(--muted); transition: all 0.15s;
+  }
+  .btn:hover { border-color: var(--teal); color: var(--teal); }
+  .btn-primary { background: var(--teal); color: #fff; border-color: var(--teal); font-weight: 500; }
+  .btn-primary:hover { background: #9580ff; border-color: #9580ff; }
+  .btn-primary:disabled { background: var(--border); color: var(--muted); border-color: var(--border); cursor: not-allowed; }
+  .migration-label { font-size: 11px; color: var(--muted); }
+  .migration-label span { color: var(--teal); }
+
+  /* ── STATS ── */
+  .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 2rem; }
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 14px 18px; }
+  .stat-label { font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+  .stat-value { font-family: var(--display); font-size: 22px; font-weight: 700; }
+  .stat-value.green { color: var(--green); }
+  .stat-value.amber { color: var(--amber); }
+  .stat-value.red   { color: var(--red); }
+  .stat-value.teal  { color: var(--teal); }
+
+  /* ── SECTION HEAD ── */
+  .section-head { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+  .section-head h2 { font-family: var(--display); font-size: 13px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }
+  .section-head .count { font-size: 10px; padding: 2px 7px; background: var(--surface2); border: 1px solid var(--border2); border-radius: 2px; color: var(--muted); }
+
+  /* ── TABLES ── */
+  .table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; overflow: hidden; margin-bottom: 2rem; }
+  .table-wrap.errors { border-color: rgba(224,85,85,0.35); }
+  .table-wrap.warnings { border-color: rgba(245,166,35,0.3); }
+  .table-wrap.clean   { border-color: rgba(61,214,140,0.25); }
+  table { width: 100%; border-collapse: collapse; }
+  th { background: var(--surface2); padding: 9px 14px; text-align: left; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--border); font-weight: 400; }
+  td { padding: 9px 14px; border-bottom: 1px solid var(--border); font-size: 12px; color: var(--text); vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(255,255,255,0.012); }
+
+  .badge-error   { color: var(--red);   font-size: 10px; padding: 2px 7px; border-radius: 2px; background: rgba(224,85,85,0.12);   border: 1px solid rgba(224,85,85,0.3);   white-space: nowrap; }
+  .badge-warning { color: var(--amber); font-size: 10px; padding: 2px 7px; border-radius: 2px; background: rgba(245,166,35,0.12); border: 1px solid rgba(245,166,35,0.3); white-space: nowrap; }
+  .badge-clean   { color: var(--green); font-size: 10px; padding: 2px 7px; border-radius: 2px; background: rgba(61,214,140,0.10);  border: 1px solid rgba(61,214,140,0.25); white-space: nowrap; }
+
+  .acct-code { font-size: 11px; color: var(--teal); font-weight: 500; }
+  .acct-name { font-size: 12px; }
+  .acct-type { font-size: 10px; color: var(--muted); }
+  .arrow-col { text-align: center; color: var(--muted); }
+
+  /* ── FILTER ── */
+  .filter-bar { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; align-items: center; }
+  .filter-btn { font-family: var(--mono); font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; padding: 5px 12px; border-radius: 2px; cursor: pointer; border: 1px solid var(--border2); background: transparent; color: var(--muted); transition: all 0.12s; }
+  .filter-btn:hover, .filter-btn.active { border-color: var(--teal); color: var(--teal); background: rgba(124,106,247,0.07); }
+  .search-input { font-family: var(--mono); font-size: 11px; background: var(--surface); border: 1px solid var(--border2); color: var(--text); padding: 5px 12px; border-radius: 2px; outline: none; margin-left: auto; width: 200px; transition: border-color 0.15s; }
+  .search-input:focus { border-color: var(--teal); }
+  .search-input::placeholder { color: var(--muted); }
+
+  /* ── EMPTY ── */
+  .empty-state { text-align: center; padding: 4rem 2rem; color: var(--muted); }
+  .empty-state .big { font-family: var(--display); font-size: 48px; font-weight: 800; color: var(--border2); margin-bottom: 1rem; }
+
+  .disclaimer { font-size: 10px; color: var(--muted); padding: 1rem; border-top: 1px solid var(--border); text-align: center; letter-spacing: 0.04em; }
+
+  @media (max-width: 1100px) { .path-grid { grid-template-columns: repeat(3, 1fr); } }
+  @media (max-width: 800px)  { .path-grid { grid-template-columns: 1fr 1fr; } .stats-row { grid-template-columns: 1fr 1fr; } main { padding: 1rem; } }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">GL</div>
+    <div>
+      <div class="logo-text">ERP Mapping Validator</div>
+      <div class="logo-sub">Chart of Accounts Migration Tool</div>
+    </div>
+  </div>
+  <div class="header-badge">100% Local · No Upload</div>
+</header>
+
+<main>
+
+  <!-- MIGRATION PATH SELECTOR -->
+  <div class="section-head" style="margin-bottom:12px">
+    <h2>Select Migration Path</h2>
+  </div>
+  <div class="path-grid" id="path-grid"></div>
+
+  <!-- DROP ZONE -->
+  <div class="drop-area" id="drop-area" onclick="document.getElementById('file-input').click()">
+    <div style="font-size:28px;opacity:0.4;margin-bottom:10px">⬇</div>
+    <div class="drop-title">Drop your mapping CSV here</div>
+    <div class="drop-sub" id="drop-cols-hint">Select a migration path above first</div>
+    <div class="drop-sub" style="margin-top:5px" id="drop-fixture-hint"></div>
+  </div>
+  <input type="file" id="file-input" accept=".csv">
+
+  <div class="file-loaded" id="file-loaded" style="display:none">
+    <div class="file-dot"></div>
+    <div class="file-name" id="file-name"></div>
+    <div class="file-meta" id="file-meta"></div>
+    <button class="clear-btn" onclick="resetAll()" title="Clear">✕</button>
+  </div>
+
+  <div class="controls">
+    <button class="btn btn-primary" id="run-btn" disabled onclick="runValidation()">Validate Mapping</button>
+    <button class="btn" id="export-btn" style="display:none" onclick="exportCSV()">Export Report</button>
+    <div class="migration-label" id="migration-label">No path selected</div>
+  </div>
+
+  <!-- RESULTS -->
+  <div id="results" style="display:none">
+
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-label">Total Mapped</div><div class="stat-value teal" id="s-total">0</div></div>
+      <div class="stat-card"><div class="stat-label">Clean</div><div class="stat-value green" id="s-clean">0</div></div>
+      <div class="stat-card"><div class="stat-label">Errors</div><div class="stat-value red" id="s-errors">0</div></div>
+      <div class="stat-card"><div class="stat-label">Warnings</div><div class="stat-value amber" id="s-warnings">0</div></div>
+    </div>
+
+    <!-- ERRORS -->
+    <div id="error-section" style="display:none">
+      <div class="section-head">
+        <h2 style="color:var(--red)">🔴 Errors — Must Resolve Before Go-Live</h2>
+        <span class="count" id="error-count"></span>
+      </div>
+      <div class="table-wrap errors">
+        <table>
+          <thead><tr><th>Type</th><th>Source Account</th><th></th><th>Target Account</th><th>Detail</th></tr></thead>
+          <tbody id="error-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- WARNINGS -->
+    <div id="warning-section" style="display:none">
+      <div class="section-head">
+        <h2 style="color:var(--amber)">🟡 Warnings — Review Required</h2>
+        <span class="count" id="warning-count"></span>
+      </div>
+      <div class="table-wrap warnings">
+        <table>
+          <thead><tr><th>Type</th><th>Source Account</th><th></th><th>Target Account</th><th>Detail</th></tr></thead>
+          <tbody id="warning-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- UNMAPPED -->
+    <div id="unmapped-section" style="display:none">
+      <div class="section-head">
+        <h2 style="color:var(--muted)">⚪ Unmapped Active Accounts</h2>
+        <span class="count" id="unmapped-count"></span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Account Code</th><th>Account Name</th><th>Type</th><th>Action Required</th></tr></thead>
+          <tbody id="unmapped-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- CLEAN -->
+    <div class="section-head">
+      <h2 style="color:var(--green)">✔ Clean Mappings</h2>
+      <span class="count" id="clean-count"></span>
+    </div>
+    <div class="filter-bar">
+      <button class="filter-btn active" onclick="filterClean('ALL',this)">All</button>
+      <button class="filter-btn" onclick="filterClean('BS',this)">Balance Sheet</button>
+      <button class="filter-btn" onclick="filterClean('PL',this)">P&L</button>
+      <input class="search-input" id="clean-search" placeholder="Search account..." oninput="applyCleanFilter()">
+    </div>
+    <div class="table-wrap clean">
+      <table>
+        <thead>
+          <tr>
+            <th>Source Code</th><th>Source Name</th><th>Type</th>
+            <th class="arrow-col">→</th>
+            <th>Target Code</th><th>Target Name</th><th>Notes</th>
+          </tr>
+        </thead>
+        <tbody id="clean-body"></tbody>
+      </table>
+    </div>
+
+  </div><!-- /results -->
+
+  <div class="empty-state" id="empty-state">
+    <div class="big">ERP</div>
+    <div>Select a migration path, then drop your mapping CSV</div>
+  </div>
+
+  <div class="disclaimer">
+    All processing runs in your browser. No data is uploaded to any server. &nbsp;|&nbsp;
+    Resolve all errors before migration cutover. Review warnings with functional consultants.
+  </div>
+</main>
+
+<script>
+// ── MIGRATION PATH CONFIGS ────────────────────────────────────────────────────
+const PATHS = {
+  "NetSuite → SAP": {
+    src: "netsuite_acct_num", tgt: "sap_gl_acct",
+    fixture: "mapping_netsuite_to_sap.csv",
+    colHint: "netsuite_acct_num, sap_gl_acct, mapping_notes",
+    srcCOA: buildNS(), tgtCOA: buildSAP(),
+    typeMap: NS_SAP_MAP(),
+  },
+  "Xero → NetSuite": {
+    src: "xero_code", tgt: "netsuite_acct_num",
+    fixture: "mapping_xero_to_netsuite.csv",
+    colHint: "xero_code, netsuite_acct_num, mapping_notes",
+    srcCOA: buildXero(), tgtCOA: buildNS(),
+    typeMap: XERO_NS_MAP(),
+  },
+  "SAP → Oracle": {
+    src: "sap_gl_acct", tgt: "oracle_acct",
+    fixture: "mapping_sap_to_oracle.csv",
+    colHint: "sap_gl_acct, oracle_acct, mapping_notes",
+    srcCOA: buildSAP(), tgtCOA: buildOracle(),
+    typeMap: SAP_ORACLE_MAP(),
+  },
+  "Workday → NetSuite": {
+    src: "workday_worktag_id", tgt: "netsuite_acct_num",
+    fixture: "mapping_workday_to_netsuite.csv",
+    colHint: "workday_worktag_id, netsuite_acct_num, mapping_notes",
+    srcCOA: buildWorkday(), tgtCOA: buildNS(),
+    typeMap: WD_NS_MAP(),
+  },
+  "QBO → NetSuite": {
+    src: "qbo_acct_num", tgt: "netsuite_acct_num",
+    fixture: "mapping_qbo_to_netsuite.csv",
+    colHint: "qbo_acct_num, netsuite_acct_num, mapping_notes",
+    srcCOA: buildQBO(), tgtCOA: buildNS(),
+    typeMap: QBO_NS_MAP(),
+  },
+};
+
+// ── COA BUILDERS ──────────────────────────────────────────────────────────────
+function buildNS() {
+  return {
+    "1000":{"name":"Cash - Operating","type":"Bank","active":true},
+    "1001":{"name":"Cash - Payroll","type":"Bank","active":true},
+    "1100":{"name":"Accounts Receivable","type":"Accounts Receivable","active":true},
+    "1110":{"name":"Prepaid Expenses","type":"Other Current Asset","active":true},
+    "1120":{"name":"Deferred Revenue - Current","type":"Other Current Liability","active":true},
+    "1200":{"name":"Fixed Assets","type":"Fixed Asset","active":true},
+    "1210":{"name":"Accumulated Depreciation","type":"Fixed Asset","active":true},
+    "1300":{"name":"Intercompany Receivable","type":"Other Current Asset","active":true},
+    "1400":{"name":"Content Assets","type":"Other Asset","active":true},
+    "2000":{"name":"Accounts Payable","type":"Accounts Payable","active":true},
+    "2010":{"name":"Accrued Liabilities","type":"Other Current Liability","active":true},
+    "2020":{"name":"Deferred Revenue","type":"Other Current Liability","active":true},
+    "2030":{"name":"Intercompany Payable","type":"Other Current Liability","active":true},
+    "2100":{"name":"Long-Term Debt","type":"Long Term Liability","active":true},
+    "2110":{"name":"Credit Card Liability","type":"Other Current Liability","active":true},
+    "2200":{"name":"Deferred Revenue","type":"Other Current Liability","active":true},
+    "3000":{"name":"Common Stock","type":"Equity","active":true},
+    "3100":{"name":"Retained Earnings","type":"Equity","active":true},
+    "3200":{"name":"APIC","type":"Equity","active":true},
+    "4000":{"name":"Revenue","type":"Income","active":true},
+    "4010":{"name":"Streaming Revenue","type":"Income","active":true},
+    "4020":{"name":"Advertising Revenue","type":"Income","active":true},
+    "4030":{"name":"Intercompany Revenue","type":"Income","active":true},
+    "4100":{"name":"Revenue Deductions","type":"Income","active":true},
+    "5000":{"name":"Cost of Goods Sold","type":"Cost of Goods Sold","active":true},
+    "5010":{"name":"Royalty Expense","type":"Cost of Goods Sold","active":true},
+    "5100":{"name":"Materials","type":"Cost of Goods Sold","active":true},
+    "6000":{"name":"Salaries & Wages","type":"Expense","active":true},
+    "6010":{"name":"Benefits","type":"Expense","active":true},
+    "6020":{"name":"Rent Expense","type":"Expense","active":true},
+    "6030":{"name":"Software & IT","type":"Expense","active":true},
+    "6040":{"name":"Marketing","type":"Expense","active":true},
+    "6050":{"name":"Depreciation Expense","type":"Expense","active":true},
+    "6100":{"name":"Rent","type":"Expense","active":true},
+    "6200":{"name":"IT and Technology","type":"Expense","active":true},
+    "6300":{"name":"Professional Services","type":"Expense","active":true},
+    "6400":{"name":"Depreciation","type":"Expense","active":true},
+    "7000":{"name":"Interest Income","type":"Other Income","active":true},
+    "7100":{"name":"Other Income","type":"Other Income","active":true},
+    "8000":{"name":"Interest Expense","type":"Other Expense","active":true},
+    "8100":{"name":"Other Expenses","type":"Other Expense","active":true},
+  };
+}
+
+function buildSAP() {
+  const BS = "X", PL = "P";
+  return {
+    "100000":{"name":"Bank Operating","type":BS,"active":true},
+    "100010":{"name":"Bank Payroll","type":BS,"active":true},
+    "110000":{"name":"Trade Receivables","type":BS,"active":true},
+    "110010":{"name":"Allowance - Bad Debt","type":BS,"active":true},
+    "110020":{"name":"Unbilled Receivables","type":BS,"active":true},
+    "120000":{"name":"Prepaid Expenses","type":BS,"active":true},
+    "130000":{"name":"Inventory","type":BS,"active":true},
+    "131000":{"name":"Intercompany Receivables","type":BS,"active":true},
+    "150000":{"name":"Plant and Equipment","type":BS,"active":true},
+    "151000":{"name":"Accumulated Depreciation","type":BS,"active":true},
+    "160000":{"name":"Intangible Assets","type":BS,"active":true},
+    "161000":{"name":"Accumulated Amortization","type":BS,"active":true},
+    "170000":{"name":"Other Long-Term Assets","type":BS,"active":true},
+    "200000":{"name":"Trade Payables","type":BS,"active":true},
+    "210000":{"name":"Accrued Liabilities","type":BS,"active":true},
+    "220000":{"name":"Deferred Revenue","type":BS,"active":true},
+    "221000":{"name":"Intercompany Payables","type":BS,"active":true},
+    "230000":{"name":"Tax Payables","type":BS,"active":true},
+    "250000":{"name":"Long-Term Borrowings","type":BS,"active":true},
+    "300000":{"name":"Share Capital","type":BS,"active":true},
+    "310000":{"name":"Retained Earnings","type":BS,"active":true},
+    "320000":{"name":"APIC","type":BS,"active":true},
+    "400000":{"name":"Content Licensing Revenue","type":PL,"active":true},
+    "400100":{"name":"Streaming Revenue","type":PL,"active":true},
+    "400200":{"name":"Advertising Revenue","type":PL,"active":true},
+    "400300":{"name":"Intercompany Revenue","type":PL,"active":true},
+    "400900":{"name":"Revenue Deductions","type":PL,"active":true},
+    "500000":{"name":"Content Amortization","type":PL,"active":true},
+    "500100":{"name":"Royalties","type":PL,"active":true},
+    "500200":{"name":"Distribution","type":PL,"active":true},
+    "600000":{"name":"Personnel Costs","type":PL,"active":true},
+    "600100":{"name":"Employee Benefits","type":PL,"active":true},
+    "600200":{"name":"Rent and Occupancy","type":PL,"active":true},
+    "600300":{"name":"IT and Software","type":PL,"active":true},
+    "600400":{"name":"Marketing","type":PL,"active":true},
+    "600500":{"name":"Travel and Entertainment","type":PL,"active":true},
+    "600600":{"name":"Depreciation","type":PL,"active":true},
+    "600700":{"name":"Professional Services","type":PL,"active":true},
+    "600800":{"name":"Insurance","type":PL,"active":true},
+    "700000":{"name":"Interest Income","type":PL,"active":true},
+    "700100":{"name":"FX Gains","type":PL,"active":true},
+    "800000":{"name":"Interest Expense","type":PL,"active":true},
+    "800100":{"name":"FX Losses","type":PL,"active":true},
+  };
+}
+
+function buildXero() {
+  return {
+    "090":{"name":"Business Checking","type":"BANK","active":true},
+    "091":{"name":"Savings Account","type":"BANK","active":true},
+    "200":{"name":"Accounts Receivable","type":"CURRENT","active":true},
+    "201":{"name":"Prepayments","type":"CURRENT","active":true},
+    "610":{"name":"Accounts Payable","type":"CURRLIAB","active":true},
+    "620":{"name":"GST/HST Collected","type":"CURRLIAB","active":true},
+    "630":{"name":"Wages Payable","type":"CURRLIAB","active":true},
+    "710":{"name":"Common Shares","type":"EQUITY","active":true},
+    "720":{"name":"Retained Earnings","type":"EQUITY","active":true},
+    "400":{"name":"Sales Revenue","type":"REVENUE","active":true},
+    "401":{"name":"Consulting Revenue","type":"REVENUE","active":true},
+    "402":{"name":"Subscription Revenue","type":"REVENUE","active":true},
+    "410":{"name":"Other Income","type":"OTHERINCOME","active":true},
+    "500":{"name":"Direct Labour","type":"DIRECTCOSTS","active":true},
+    "501":{"name":"Hosting Costs","type":"DIRECTCOSTS","active":true},
+    "600":{"name":"Salaries","type":"OVERHEADS","active":true},
+    "601":{"name":"Rent","type":"OVERHEADS","active":true},
+    "602":{"name":"Software Subscriptions","type":"OVERHEADS","active":true},
+    "603":{"name":"Marketing","type":"OVERHEADS","active":true},
+    "604":{"name":"Professional Fees","type":"OVERHEADS","active":true},
+    "800":{"name":"Fixed Assets","type":"FIXED","active":true},
+    "801":{"name":"Accumulated Depreciation","type":"DEPRECIATN","active":true},
+    "820":{"name":"Depreciation Expense","type":"OVERHEADS","active":true},
+    "900":{"name":"OLD Clearing Account","type":"CURRENT","active":false},
+  };
+}
+
+function buildOracle() {
+  return {
+    "01-1000-000":{"name":"Cash and Cash Equivalents","type":"Balance Sheet","active":true},
+    "01-1100-000":{"name":"Accounts Receivable","type":"Balance Sheet","active":true},
+    "01-1101-000":{"name":"Allowance for Doubtful Accts","type":"Balance Sheet","active":true},
+    "01-1200-000":{"name":"Raw Material Inventory","type":"Balance Sheet","active":true},
+    "01-1201-000":{"name":"WIP Inventory","type":"Balance Sheet","active":true},
+    "01-1202-000":{"name":"Finished Goods Inventory","type":"Balance Sheet","active":true},
+    "01-1300-000":{"name":"Prepaid Assets","type":"Balance Sheet","active":true},
+    "01-1500-000":{"name":"Property Plant Equipment","type":"Balance Sheet","active":true},
+    "01-1501-000":{"name":"Accumulated Depreciation","type":"Balance Sheet","active":true},
+    "01-1600-000":{"name":"Intangible Assets","type":"Balance Sheet","active":true},
+    "01-2000-000":{"name":"Accounts Payable","type":"Balance Sheet","active":true},
+    "01-2100-000":{"name":"Accrued Liabilities","type":"Balance Sheet","active":true},
+    "01-2200-000":{"name":"Deferred Revenue","type":"Balance Sheet","active":true},
+    "01-2300-000":{"name":"Income Taxes Payable","type":"Balance Sheet","active":true},
+    "01-2500-000":{"name":"Notes Payable Long-Term","type":"Balance Sheet","active":true},
+    "01-3000-000":{"name":"Common Stock","type":"Balance Sheet","active":true},
+    "01-3100-000":{"name":"Retained Earnings","type":"Balance Sheet","active":true},
+    "01-4000-000":{"name":"Product Revenue","type":"Income Statement","active":true},
+    "01-4001-000":{"name":"Service Revenue","type":"Income Statement","active":true},
+    "01-4900-000":{"name":"Contra Revenue","type":"Income Statement","active":true},
+    "01-5000-000":{"name":"Cost of Revenue","type":"Income Statement","active":true},
+    "01-5100-000":{"name":"Manufacturing Overhead","type":"Income Statement","active":true},
+    "01-6000-000":{"name":"Research and Development","type":"Income Statement","active":true},
+    "01-6100-000":{"name":"Sales and Marketing","type":"Income Statement","active":true},
+    "01-6200-000":{"name":"General and Administrative","type":"Income Statement","active":true},
+    "01-6300-000":{"name":"Stock-Based Compensation","type":"Income Statement","active":true},
+    "01-7000-000":{"name":"Interest and Other Income","type":"Income Statement","active":true},
+    "01-8000-000":{"name":"Interest Expense","type":"Income Statement","active":true},
+    "01-8100-000":{"name":"Income Tax Expense","type":"Income Statement","active":true},
+  };
+}
+
+function buildWorkday() {
+  return {
+    "WD-1000":{"name":"Cash","type":"Assets","active":true},
+    "WD-1100":{"name":"Accounts Receivable","type":"Assets","active":true},
+    "WD-1200":{"name":"Prepaid Expenses","type":"Assets","active":true},
+    "WD-1300":{"name":"PP&E Net","type":"Assets","active":true},
+    "WD-2000":{"name":"Accounts Payable","type":"Liabilities","active":true},
+    "WD-2100":{"name":"Accrued Salaries","type":"Liabilities","active":true},
+    "WD-2200":{"name":"Deferred Revenue","type":"Liabilities","active":true},
+    "WD-3000":{"name":"Common Stock","type":"Equity","active":true},
+    "WD-3100":{"name":"Retained Earnings","type":"Equity","active":true},
+    "WD-4000":{"name":"Service Revenue","type":"Revenue","active":true},
+    "WD-4100":{"name":"Product Revenue","type":"Revenue","active":true},
+    "WD-5000":{"name":"Personnel Costs","type":"Expenses","active":true},
+    "WD-5100":{"name":"Occupancy","type":"Expenses","active":true},
+    "WD-5200":{"name":"Technology","type":"Expenses","active":true},
+    "WD-5300":{"name":"Professional Services","type":"Expenses","active":true},
+    "WD-5400":{"name":"Depreciation","type":"Expenses","active":true},
+    "WD-ARCH":{"name":"Archived Suspense","type":"Assets","active":false},
+  };
+}
+
+function buildQBO() {
+  return {
+    "1000":{"name":"Checking","type":"Bank","active":true},
+    "1100":{"name":"Accounts Receivable (A/R)","type":"Accounts Receivable (A/R)","active":true},
+    "1200":{"name":"Prepaid Expenses","type":"Other Current Assets","active":true},
+    "1500":{"name":"Equipment","type":"Fixed Assets","active":true},
+    "1510":{"name":"Accumulated Depreciation","type":"Fixed Assets","active":true},
+    "2000":{"name":"Accounts Payable (A/P)","type":"Accounts Payable (A/P)","active":true},
+    "2100":{"name":"Accrued Liabilities","type":"Other Current Liabilities","active":true},
+    "2200":{"name":"Credit Card Payable","type":"Credit Card","active":true},
+    "2300":{"name":"Deferred Revenue","type":"Other Current Liabilities","active":true},
+    "3000":{"name":"Opening Balance Equity","type":"Equity","active":true},
+    "3100":{"name":"Retained Earnings","type":"Equity","active":true},
+    "4000":{"name":"Services","type":"Income","active":true},
+    "4100":{"name":"Product Sales","type":"Income","active":true},
+    "5000":{"name":"Cost of Labour","type":"Cost of Goods Sold","active":true},
+    "5100":{"name":"Cost of Materials","type":"Cost of Goods Sold","active":true},
+    "6000":{"name":"Payroll Expenses","type":"Expenses","active":true},
+    "6100":{"name":"Rent or Lease","type":"Expenses","active":true},
+    "6200":{"name":"Computer and Internet Exp","type":"Expenses","active":true},
+    "6300":{"name":"Professional Fees","type":"Expenses","active":true},
+    "6400":{"name":"Depreciation","type":"Expenses","active":true},
+    "7000":{"name":"Other Income","type":"Other Income","active":true},
+    "8000":{"name":"Other Expenses","type":"Other Expense","active":true},
+    "9999":{"name":"Uncategorized Expense","type":"Expenses","active":false},
+  };
+}
+
+// ── TYPE MAPS ─────────────────────────────────────────────────────────────────
+function NS_SAP_MAP() {
+  return {"Bank":"X","Accounts Receivable":"X","Other Current Asset":"X","Fixed Asset":"X","Other Asset":"X","Accounts Payable":"X","Other Current Liability":"X","Long Term Liability":"X","Equity":"X","Income":"P","Cost of Goods Sold":"P","Expense":"P","Other Income":"P","Other Expense":"P"};
+}
+function XERO_NS_MAP() {
+  return {"BANK":"Bank","CURRENT":"Other Current Asset","CURRLIAB":"Other Current Liability","DEPRECIATN":"Fixed Asset","DIRECTCOSTS":"Cost of Goods Sold","EQUITY":"Equity","EXPENSE":"Expense","FIXED":"Fixed Asset","OTHERINCOME":"Other Income","OVERHEADS":"Expense","PREPAYMENT":"Other Current Asset","REVENUE":"Income","SALES":"Income","TERMLIAB":"Long Term Liability"};
+}
+function SAP_ORACLE_MAP() { return {"X":"Balance Sheet","P":"Income Statement"}; }
+function WD_NS_MAP() { return {"Assets":"Other Current Asset","Liabilities":"Other Current Liability","Equity":"Equity","Revenue":"Income","Expenses":"Expense"}; }
+function QBO_NS_MAP() {
+  return {"Bank":"Bank","Accounts Receivable (A/R)":"Accounts Receivable","Other Current Assets":"Other Current Asset","Fixed Assets":"Fixed Asset","Other Assets":"Other Asset","Accounts Payable (A/P)":"Accounts Payable","Credit Card":"Other Current Liability","Other Current Liabilities":"Other Current Liability","Long Term Liabilities":"Long Term Liability","Equity":"Equity","Income":"Income","Cost of Goods Sold":"Cost of Goods Sold","Expenses":"Expense","Other Income":"Other Income","Other Expense":"Other Expense"};
+}
+
+// ── RENDER PATH CARDS ─────────────────────────────────────────────────────────
+let selectedPath = null;
+let resultData   = { errors:[], warnings:[], unmapped:[], clean:[] };
+
+const pathGrid = document.getElementById("path-grid");
+Object.keys(PATHS).forEach(name => {
+  const [src, tgt] = name.split(" → ");
+  const card = document.createElement("div");
+  card.className = "path-card";
+  card.innerHTML = `
+    <div class="path-erps">${src}</div>
+    <div class="path-arrow">↓</div>
+    <div class="path-erps">${tgt}</div>
+    <div class="path-fixture">fixture: ${PATHS[name].fixture}</div>
+    <div class="path-cols">${PATHS[name].colHint}</div>`;
+  card.onclick = () => selectPath(name, card);
+  pathGrid.appendChild(card);
+});
+
+function selectPath(name, card) {
+  selectedPath = name;
+  document.querySelectorAll(".path-card").forEach(c => c.classList.remove("selected"));
+  card.classList.add("selected");
+  const cfg = PATHS[name];
+  document.getElementById("drop-cols-hint").innerHTML =
+    `Required columns: <span>${cfg.colHint}</span>`;
+  document.getElementById("drop-fixture-hint").innerHTML =
+    `Test fixture: <span>${cfg.fixture}</span>`;
+  document.getElementById("migration-label").innerHTML =
+    `Selected: <span>${name}</span>`;
+  updateRunBtn();
+}
+
+function updateRunBtn() {
+  document.getElementById("run-btn").disabled = !(selectedPath && loadedFile);
+}
+
+// ── FILE HANDLING ─────────────────────────────────────────────────────────────
+const dropArea  = document.getElementById("drop-area");
+const fileInput = document.getElementById("file-input");
+let loadedFile  = null;
+
+dropArea.addEventListener("dragover", e => { e.preventDefault(); dropArea.classList.add("dragover"); });
+dropArea.addEventListener("dragleave", () => dropArea.classList.remove("dragover"));
+dropArea.addEventListener("drop", e => {
+  e.preventDefault(); dropArea.classList.remove("dragover");
+  const f = e.dataTransfer.files[0];
+  if (f) handleFile(f);
+});
+fileInput.addEventListener("change", e => { if (e.target.files[0]) handleFile(e.target.files[0]); });
+
+function handleFile(file) {
+  if (!file.name.endsWith(".csv")) { alert("Please upload a .csv file."); return; }
+  loadedFile = file;
+  document.getElementById("drop-area").style.display = "none";
+  document.getElementById("file-loaded").style.display = "flex";
+  document.getElementById("file-name").textContent = file.name;
+  document.getElementById("file-meta").textContent = (file.size/1024).toFixed(1) + " KB";
+  updateRunBtn();
+}
+
+function resetAll() {
+  loadedFile = null;
+  document.getElementById("drop-area").style.display = "block";
+  document.getElementById("file-loaded").style.display = "none";
+  document.getElementById("results").style.display = "none";
+  document.getElementById("empty-state").style.display = "block";
+  document.getElementById("export-btn").style.display = "none";
+  fileInput.value = "";
+  updateRunBtn();
+}
+
+// ── CSV PARSE ─────────────────────────────────────────────────────────────────
+function parseCSV(text) {
+  const lines = text.trim().split(/\r?\n/);
+  const headers = lines[0].split(",").map(h => h.trim().replace(/^"|"$/g,""));
+  return lines.slice(1).filter(l => l.trim()).map(line => {
+    const vals = line.split(",");
+    const obj = {};
+    headers.forEach((h,i) => { obj[h] = (vals[i]||"").trim().replace(/^"|"$/g,""); });
+    return obj;
+  });
+}
+
+// ── VALIDATION ENGINE ─────────────────────────────────────────────────────────
+function runValidation() {
+  if (!loadedFile || !selectedPath) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const cfg  = PATHS[selectedPath];
+    const rows = parseCSV(e.target.result);
+    if (!rows.length) { alert("CSV appears empty."); return; }
+    if (!(cfg.src in rows[0])) {
+      alert(`Missing required column: "${cfg.src}"\nExpected: ${cfg.colHint}`);
+      return;
+    }
+
+    const srcLookup = cfg.srcCOA;
+    const tgtLookup = cfg.tgtCOA;
+    const typeMap   = cfg.typeMap;
+
+    const errors = [], warnings = [], clean = [];
+    const tgtUsage = {};
+    const mappedSrc = new Set();
+
+    rows.forEach(row => {
+      const srcCode = row[cfg.src] || "";
+      const tgtCode = row[cfg.tgt] || "";
+      const notes   = row.mapping_notes || "";
+
+      if (!srcCode) return;
+      mappedSrc.add(srcCode);
+
+      const s = srcLookup[srcCode];
+      const t = tgtCode ? tgtLookup[tgtCode] : null;
+
+      if (!s) { errors.push({type:"MISSING_SOURCE", src:srcCode, tgt:tgtCode, detail:`Source account "${srcCode}" not found in ${selectedPath.split(" → ")[0]} COA.`}); return; }
+      if (tgtCode && !t) { errors.push({type:"MISSING_TARGET", src:srcCode, tgt:tgtCode, detail:`Target account "${tgtCode}" not found in ${selectedPath.split(" → ")[1]} COA.`}); return; }
+      if (!tgtCode) { warnings.push({type:"UNMAPPED_INLINE", src:srcCode, tgt:"—", srcName:s.name, tgtName:"", detail:`${srcCode} (${s.name}) has no target account specified.`}); return; }
+
+      if (!s.active) warnings.push({type:"INACTIVE", src:srcCode, tgt:tgtCode, srcName:s.name, tgtName:t?.name||"", detail:`Source account ${srcCode} (${s.name}) is inactive. Confirm migration intent.`});
+
+      const expected = typeMap[s.type];
+      if (expected && t && t.type !== expected) {
+        errors.push({type:"TYPE_MISMATCH", src:srcCode, tgt:tgtCode, srcName:s.name, tgtName:t.name, detail:`Type mismatch: source type "${s.type}" expects target type "${expected}" but found "${t.type}".`});
+      }
+
+      if (tgtCode) {
+        if (!tgtUsage[tgtCode]) tgtUsage[tgtCode] = [];
+        tgtUsage[tgtCode].push(srcCode);
+      }
+
+      clean.push({srcCode, srcName:s.name, srcType:s.type, tgtCode, tgtName:t?.name||"", notes});
+    });
+
+    Object.entries(tgtUsage).forEach(([tgt, srcs]) => {
+      if (srcs.length > 1) {
+        warnings.push({type:"DUPLICATE_TARGET", src:srcs.join(", "), tgt, srcName:`${srcs.length} accounts`, tgtName:tgtLookup[tgt]?.name||tgt, detail:`Target "${tgt}" (${tgtLookup[tgt]?.name||""}) is used by ${srcs.length} source accounts: ${srcs.join(", ")}.`});
+      }
+    });
+
+    const unmapped = Object.entries(srcLookup)
+      .filter(([code, a]) => !mappedSrc.has(code) && a.active)
+      .map(([code, a]) => ({code, name:a.name, type:a.type}));
+
+    resultData = {errors, warnings, unmapped, clean};
+    renderResults();
+  };
+  reader.readAsText(loadedFile);
+}
+
+// ── RENDER RESULTS ────────────────────────────────────────────────────────────
+function renderResults() {
+  const {errors, warnings, unmapped, clean} = resultData;
+  document.getElementById("empty-state").style.display = "none";
+  document.getElementById("results").style.display = "block";
+  document.getElementById("export-btn").style.display = "inline-flex";
+
+  document.getElementById("s-total").textContent    = errors.length + warnings.length + clean.length;
+  document.getElementById("s-clean").textContent    = clean.length;
+  document.getElementById("s-errors").textContent   = errors.length;
+  document.getElementById("s-warnings").textContent = warnings.length;
+
+  // Errors
+  if (errors.length) {
+    document.getElementById("error-section").style.display = "block";
+    document.getElementById("error-count").textContent = errors.length + " issues";
+    const eb = document.getElementById("error-body");
+    eb.innerHTML = "";
+    errors.forEach(e => {
+      eb.innerHTML += `<tr>
+        <td><span class="badge-error">${e.type}</span></td>
+        <td><div class="acct-code">${e.src}</div><div class="acct-name">${e.srcName||""}</div></td>
+        <td class="arrow-col">→</td>
+        <td><div class="acct-code">${e.tgt}</div><div class="acct-name">${e.tgtName||""}</div></td>
+        <td style="color:var(--muted);font-size:11px">${e.detail}</td>
+      </tr>`;
+    });
+  } else { document.getElementById("error-section").style.display = "none"; }
+
+  // Warnings
+  if (warnings.length) {
+    document.getElementById("warning-section").style.display = "block";
+    document.getElementById("warning-count").textContent = warnings.length + " items";
+    const wb = document.getElementById("warning-body");
+    wb.innerHTML = "";
+    warnings.forEach(w => {
+      wb.innerHTML += `<tr>
+        <td><span class="badge-warning">${w.type}</span></td>
+        <td><div class="acct-code">${w.src}</div><div class="acct-name">${w.srcName||""}</div></td>
+        <td class="arrow-col">→</td>
+        <td><div class="acct-code">${w.tgt}</div><div class="acct-name">${w.tgtName||""}</div></td>
+        <td style="color:var(--muted);font-size:11px">${w.detail}</td>
+      </tr>`;
+    });
+  } else { document.getElementById("warning-section").style.display = "none"; }
+
+  // Unmapped
+  if (unmapped.length) {
+    document.getElementById("unmapped-section").style.display = "block";
+    document.getElementById("unmapped-count").textContent = unmapped.length + " accounts";
+    const ub = document.getElementById("unmapped-body");
+    ub.innerHTML = "";
+    unmapped.forEach(a => {
+      ub.innerHTML += `<tr>
+        <td class="acct-code">${a.code}</td>
+        <td>${a.name}</td>
+        <td class="acct-type">${a.type}</td>
+        <td style="color:var(--amber);font-size:11px">Add to mapping file before cutover</td>
+      </tr>`;
+    });
+  } else { document.getElementById("unmapped-section").style.display = "none"; }
+
+  document.getElementById("clean-count").textContent = clean.length + " mappings";
+  renderCleanTable(clean);
+}
+
+let cleanFilter = "ALL";
+function filterClean(f, btn) {
+  cleanFilter = f;
+  document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
+  if (btn) btn.classList.add("active");
+  applyCleanFilter();
+}
+function applyCleanFilter() {
+  const search = (document.getElementById("clean-search")?.value||"").toLowerCase();
+  let filtered = resultData.clean;
+  if (cleanFilter === "BS") filtered = filtered.filter(r => ["X","Balance Sheet","Bank","Accounts Receivable","Other Current Asset","Fixed Asset","Other Asset","Accounts Payable","Other Current Liability","Long Term Liability","Equity","Assets","Liabilities","Fixed Assets","Other Current Assets","Other Current Liabilities"].includes(r.srcType));
+  if (cleanFilter === "PL") filtered = filtered.filter(r => ["P","Income Statement","Income","Cost of Goods Sold","Expense","Other Income","Other Expense","Revenue","Expenses","DIRECTCOSTS","OVERHEADS"].includes(r.srcType));
+  if (search) filtered = filtered.filter(r => r.srcCode.toLowerCase().includes(search) || r.srcName.toLowerCase().includes(search) || r.tgtCode.toLowerCase().includes(search));
+  renderCleanTable(filtered);
+  document.getElementById("clean-count").textContent = filtered.length + " mappings";
+}
+function renderCleanTable(rows) {
+  const body = document.getElementById("clean-body");
+  body.innerHTML = "";
+  rows.forEach(r => {
+    body.innerHTML += `<tr>
+      <td class="acct-code">${r.srcCode}</td>
+      <td>${r.srcName}</td>
+      <td class="acct-type">${r.srcType}</td>
+      <td class="arrow-col" style="color:var(--teal)">→</td>
+      <td class="acct-code">${r.tgtCode}</td>
+      <td>${r.tgtName}</td>
+      <td style="color:var(--muted);font-size:11px">${r.notes}</td>
+    </tr>`;
+  });
+}
+
+// ── EXPORT ────────────────────────────────────────────────────────────────────
+function exportCSV() {
+  const {errors, warnings, clean} = resultData;
+  let csv = "Status,Type,Source Code,Source Name,Target Code,Target Name,Notes/Detail\n";
+  clean.forEach(r => {
+    csv += `CLEAN,,${r.srcCode},"${r.srcName}",${r.tgtCode},"${r.tgtName}","${r.notes}"\n`;
+  });
+  errors.forEach(e => {
+    csv += `ERROR,${e.type},${e.src},"${e.srcName||""}",${e.tgt},"${e.tgtName||""}","${e.detail}"\n`;
+  });
+  warnings.forEach(w => {
+    csv += `WARNING,${w.type},${w.src},"${w.srcName||""}",${w.tgt},"${w.tgtName||""}","${w.detail}"\n`;
+  });
+  const blob = new Blob([csv], {type:"text/csv"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = `erp_mapping_validation_${selectedPath?.replace(/[^a-z]/gi,"_")||"result"}.csv`;
+  a.click();
+}
+</script>
+</body>
+</html>

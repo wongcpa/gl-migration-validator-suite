@@ -1,0 +1,25 @@
+source_account,target_account,notes
+090,1000,Checking accounts
+091,1001,Savings accounts
+200,1100,AR
+201,1110,Prepayments to prepaid
+610,2000,AP
+620,2010,Tax collected
+630,2020,Wages payable
+710,3000,Common shares
+720,3100,Retained earnings
+400,4000,Sales revenue
+401,4010,Consulting revenue
+402,4020,Subscription revenue
+410,4100,Other income
+500,5000,Direct labour
+501,5010,Hosting
+600,6000,Salaries
+601,6010,Rent
+602,6020,Software
+603,6030,Marketing
+604,6040,Professional fees
+800,1200,Fixed assets
+801,1210,Accum depr
+820,6050,Depreciation expense
+900,1110,OLD account to prepaid — inactive

@@ -1,0 +1,18 @@
+source_account,target_account,notes
+WD-1000,1000,Cash
+WD-1100,1100,AR
+WD-1200,1110,Prepaid
+WD-1300,1200,PP&E
+WD-2000,2000,AP
+WD-2100,2100,Accrued liabilities
+WD-2200,2200,Deferred revenue
+WD-3000,3000,Common stock
+WD-3100,3100,Retained earnings
+WD-4000,4000,Service revenue
+WD-4100,4100,Product revenue
+WD-5000,6000,Personnel
+WD-5100,6100,Occupancy
+WD-5200,6200,Technology
+WD-5300,6300,Professional services
+WD-5400,6400,Depreciation
+WD-ARCH,1110,Archived to prepaid — inactive account

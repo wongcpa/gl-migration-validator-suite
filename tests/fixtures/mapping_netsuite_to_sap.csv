@@ -1,0 +1,46 @@
+source_account,target_account,notes
+1000,100000,Operating bank accounts aligned
+1001,100010,Payroll bank accounts aligned
+1010,110000,Trade receivables
+1020,110010,Allowance accounts aligned
+1030,110020,Unbilled AR
+1040,120000,Prepaid aligned
+1050,130000,Inventory aligned
+1060,131000,Intercompany receivables
+1200,150000,Equipment
+1210,151000,Accum depreciation
+1300,160000,Content assets to intangibles
+1310,161000,Accum amortization
+2000,200000,Trade payables
+2010,210000,Accrued liabilities
+2020,220000,Deferred revenue
+2030,221000,IC payables
+2040,230000,Tax payable
+2100,250000,Long-term debt
+3000,300000,Share capital
+3100,310000,Retained earnings
+3200,320000,APIC
+4000,400000,Content licensing revenue
+4010,400100,Streaming revenue
+4020,400200,Advertising revenue
+4030,400300,IC revenue
+4100,400000,Returns — NOTE: should map to 400900 contra account
+4110,400000,Discounts — NOTE: duplicate target with 4000 and 4100
+5000,500000,Content amortization
+5010,500100,Royalties
+5020,500200,Distribution
+6000,600000,Salaries
+6010,600100,Benefits
+6020,600200,Rent
+6030,600300,Software
+6040,600400,Marketing
+6050,600500,T&E
+6060,600600,Depreciation
+6070,600700,Professional fees
+6080,600800,Insurance
+6999,600000,Misc to personnel — review required
+7000,700000,Interest income
+7010,700100,FX gains
+8000,800000,Interest expense
+8010,800100,FX losses
+9999,120000,Suspense — inactive account mapped

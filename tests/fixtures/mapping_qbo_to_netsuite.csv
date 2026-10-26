@@ -1,0 +1,24 @@
+source_account,target_account,notes
+1000,1000,Checking to cash
+1100,1100,AR
+1200,1110,Prepaid
+1500,1200,Equipment to fixed assets
+1510,1210,Accum depr
+2000,2000,AP
+2100,2100,Accrued liabilities
+2200,2110,Credit card
+2300,2200,Deferred revenue
+3000,3000,OBE to common stock — reclassification may be needed
+3100,3100,Retained earnings
+4000,4000,Services revenue
+4100,4100,Product sales
+5000,5000,Cost of labour
+5100,5100,Materials
+6000,6000,Payroll expenses
+6100,6100,Rent
+6200,6200,Computer/internet
+6300,6300,Professional fees
+6400,6400,Depreciation
+7000,7000,Other income
+8000,8000,Other expenses
+9999,6200,Uncategorized to IT — inactive account
