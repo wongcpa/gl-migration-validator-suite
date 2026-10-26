@@ -7,7 +7,7 @@ qbo_acct_num,netsuite_acct_num,mapping_notes
 2000,2000,AP
 2100,2100,Accrued liabilities
 2200,2110,Credit card
-2300,2200,Deferred revenue
+2300,2020,Deferred revenue
 3000,3000,OBE to common stock — reclassification may be needed
 3100,3100,Retained earnings
 4000,4000,Services revenue

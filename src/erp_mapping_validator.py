@@ -23,6 +23,7 @@ DATA PRIVACY: All data is processed locally. No data leaves your machine.
 """
 
 import csv
+import re
 import sys
 from datetime import date
 from pathlib import Path
@@ -46,6 +47,7 @@ NS_COA: List[Tuple] = [
     ("2020","Deferred Revenue","Other Current Liability",True),
     ("2030","Intercompany Payable","Other Current Liability",True),
     ("2100","Long-Term Debt","Long Term Liability",True),
+    ("2110","Credit Card Liability","Other Current Liability",True),
     ("3000","Common Stock","Equity",True),("3100","Retained Earnings","Equity",True),
     ("3200","APIC","Equity",True),
     ("4000","Content Licensing Revenue","Income",True),("4010","Streaming Revenue","Income",True),
@@ -54,6 +56,7 @@ NS_COA: List[Tuple] = [
     ("5000","Content Amortization","Cost of Goods Sold",True),
     ("5010","Royalty Expense","Cost of Goods Sold",True),
     ("5020","Distribution Costs","Cost of Goods Sold",True),
+    ("5100","Materials","Cost of Goods Sold",True),
     ("6000","Salaries & Wages","Expense",True),("6010","Benefits","Expense",True),
     ("6020","Rent Expense","Expense",True),("6030","Software & IT","Expense",True),
     ("6040","Marketing","Expense",True),("6050","Depreciation Expense","Expense",True),
@@ -61,6 +64,7 @@ NS_COA: List[Tuple] = [
     ("6300","Professional Services","Expense",True),("6400","Depreciation","Expense",True),
     ("7000","Interest Income","Other Income",True),("7100","Other Income","Other Income",True),
     ("8000","Interest Expense","Other Expense",True),("8100","Other Expenses","Other Expense",True),
+    ("9999","Suspense - Legacy","Other Current Asset",False),
 ]
 
 # SAP S/4HANA
@@ -389,6 +393,11 @@ def load_mapping(filepath: str, src_col: str,
     return rows
 
 
+# Contra revenue accounts (deductions from gross) must not land in gross revenue.
+CONTRA_RE = re.compile(r"deduction|contra|return|rebate|discount|price protection", re.I)
+GROSS_RE  = re.compile(r"revenue|sales", re.I)
+
+
 def validate(mapping: List[Tuple], src_lookup: Dict, tgt_lookup: Dict,
              type_map: Dict, src_name: str, tgt_name: str):
     """
@@ -421,13 +430,27 @@ def validate(mapping: List[Tuple], src_lookup: Dict, tgt_lookup: Dict,
                 f"Confirm migration intent.")
 
         expected = type_map.get(s["type"])
-        if expected and t["type"] != expected:
+        mismatch = bool(expected) and t["type"] != expected
+        if mismatch:
             errors.append(
                 f"[TYPE_MISMATCH] {src_code} ({s['type']}) → {tgt_code} ({t['type']}). "
                 f"Expected target type: {expected}.")
 
+        contra_to_gross = (bool(CONTRA_RE.search(s["name"])) and bool(GROSS_RE.search(t["name"]))
+                           and not CONTRA_RE.search(t["name"]))
+        if contra_to_gross:
+            errors.append(
+                f"[CONTRA_TO_GROSS] {src_code} ({s['name']}) → {tgt_code} ({t['name']}). "
+                f"Contra revenue mapped to gross revenue; net revenue would be overstated.")
+
+        if "opening balance equity" in s["name"].lower():
+            warnings.append(
+                f"[OBE_RECLASS] {src_code} ({s['name']}) → {tgt_code}. Reclassify Opening "
+                f"Balance Equity (usually to Retained Earnings) and clear it at cutover.")
+
         tgt_usage.setdefault(tgt_code, []).append(src_code)
-        clean.append((src_code, s["name"], tgt_code, t["name"], notes))
+        if not (mismatch or contra_to_gross):
+            clean.append((src_code, s["name"], tgt_code, t["name"], notes))
 
     for tgt_code, srcs in tgt_usage.items():
         if len(srcs) > 1:
@@ -507,7 +530,7 @@ def export_csv(clean, errors, warnings, filepath: str) -> None:
                      "issue": w})
     if not rows:
         return
-    with open(filepath, "w", newline="") as f:
+    with open(filepath, "w", newline="", encoding="utf-8-sig") as f:
         writer = csv.DictWriter(f, fieldnames=rows[0].keys())
         writer.writeheader()
         writer.writerows(rows)

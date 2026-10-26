@@ -1,31 +1,44 @@
 sap_gl_acct,oracle_acct,mapping_notes
 100000,01-1000-000,Cash
-110000,01-1100-000,AR
-110010,01-1101-000,Allowance
-120000,01-1200-000,Raw material
-121000,01-1201-000,WIP
-122000,01-1202-000,Finished goods
-130000,01-1300-000,Prepaid
-150000,01-1500-000,PP&E
-151000,01-1501-000,Accum depr
-160000,01-1600-000,Intangibles
-200000,01-2000-000,AP
+100010,01-1000-000,Payroll bank consolidated into cash
+110000,01-1100-000,Trade receivables
+110010,01-1101-000,Allowance for doubtful accounts
+110020,01-1100-000,Unbilled receivables into trade AR
+120000,01-1300-000,Prepaid expenses
+121000,01-1201-000,WIP — account not in SAP COA
+130000,01-1202-000,Inventory to finished goods
+131000,,Intercompany receivables — no Oracle IC segment yet
+150000,01-1500-000,Plant and equipment
+151000,01-1501-000,Accumulated depreciation
+160000,01-1600-000,Content intangibles
+161000,01-1600-000,Accumulated amortization netted against intangibles
+200000,01-2000-000,Trade payables
 210000,01-2100-000,Accrued liabilities
 220000,01-2200-000,Deferred revenue
-230000,01-2300-000,Tax payable
-250000,01-2500-000,LT debt
+221000,01-2100-000,Intercompany payables into accrued liabilities
+230000,01-2300-000,Tax payables
+250000,01-2500-000,Long-term borrowings
 300000,01-3000-000,Share capital
 310000,01-3100-000,Retained earnings
-400000,01-4000-000,Product revenue
-400100,01-4001-000,Service revenue
-400900,01-4900-000,Contra - rebates
-401000,01-4900-000,Contra - returns — duplicate target
-500000,01-5000-000,COGS
-500100,01-5100-000,Mfg overhead
-600000,01-6000-000,R&D
-600100,01-6100-000,S&M
-600200,01-6200-000,G&A
-600300,01-6300-000,SBC
+320000,01-3000-000,APIC into common stock
+400000,01-4000-000,Content licensing revenue
+400100,01-4001-000,Streaming revenue to service revenue
+400200,01-4001-000,Advertising revenue to service revenue
+400300,01-4001-000,Intercompany revenue to service revenue
+400900,01-4000-000,Revenue deductions — should map to 01-4900-000 contra revenue
+500000,01-5000-000,Content amortization to cost of revenue
+500100,01-5000-000,Royalties to cost of revenue
+500200,01-5000-000,Distribution to cost of revenue
+600000,01-6200-000,Personnel costs to G&A
+600100,01-6200-000,Benefits to G&A
+600200,01-6200-000,Rent to G&A
+600300,01-6000-000,IT and software to R&D
+600400,01-6100-000,Marketing
+600500,01-6200-000,T&E to G&A
+600600,01-1501-000,Depreciation expense mapped to accumulated depreciation — review
+600700,01-6200-000,Professional services to G&A
+600800,01-6200-000,Insurance to G&A
 700000,01-7000-000,Interest income
+700100,01-7000-000,FX gains to other income
 800000,01-8000-000,Interest expense
-800100,01-8100-000,Tax expense
+800100,01-8000-000,FX losses to interest expense
